@@ -1,3 +1,4 @@
+import itertools
 import time
 import typing as t
 
@@ -21,6 +22,27 @@ class Time:
             self.start = time.perf_counter()
             return True
         return False
+
+
+class ColorCycle:
+    """Cycle through some colors"""
+
+    def __init__(self, colors: t.Sequence, cooldown: float) -> None:
+        self.colors = itertools.cycle(colors)
+        self.color = self._get()
+        self.target_color = self._get()
+        self.cooldown = cooldown
+        self.timer = Time(cooldown)
+
+    def _get(self) -> pygame.Color:
+        return pygame.Color(next(self.colors))
+
+    def update(self):
+        if self.timer.tick():
+            self.color = lerp_color(self.color[:3], self.target_color[:3])
+
+        if self.color == self.target_color:
+            self.target_color = self._get()
 
 
 def lerp_color(color_1: t.Sequence, color_2: t.Sequence) -> tuple[int, int, int]:
