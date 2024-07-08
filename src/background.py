@@ -98,28 +98,69 @@ class BloomLayer:
 
 
 class Star:
-    pass
+    RADIUS = 10.0
+
+    def __init__(self, parallax_scale: int, pos: pygame.Vector2) -> None:
+        self.radius = Star.RADIUS * parallax_scale
+        self.parallax_scale = parallax_scale
+        self.image = utils.circle_surf(self.radius, "white")
+        self.rect = self.image.get_rect()
+        self.pos = pos.copy()
+        self.rect.center = self.pos
+
+    def update(self):
+        pass
+
+    def draw(self):
+        shared.screen.blit(
+            self.image, shared.camera.transform(self.rect) * self.parallax_scale
+        )
 
 
 class StarManager:
-    pass
+    @staticmethod
+    def _get_rnd_sp() -> pygame.Vector2:
+        x = random.randrange(-3000, 3000)
+        y = random.randrange(-3000, 3000)
+
+        return pygame.Vector2(x, y)
+
+    def __init__(self) -> None:
+        self.layers = [
+            [Star(0.4, self._get_rnd_sp()) for _ in range(100)],
+            [Star(0.7, self._get_rnd_sp()) for _ in range(100)],
+            [Star(1.0, self._get_rnd_sp()) for _ in range(100)],
+        ]
+
+    def update(self):
+        for layer in self.layers:
+            for star in layer:
+                star.update()
+
+    def draw(self):
+        for layer in self.layers:
+            for star in layer:
+                star.draw()
 
 
 class Background:
     def __init__(self) -> None:
         self.blooms = [
-            # BloomLayer(1, ["red", "blue"], 0.05),
+            BloomLayer(1, ["red", "blue"], 0.05),
             BloomLayer(2, ["#0a205a", "#040c24"], 0.0),
             BloomLayer(3, ["#e303fc", "#0362fc"], 0.0),
         ]
+        self.star_manager = StarManager()
         self.border = Border()
 
     def update(self):
         for bloom in self.blooms:
             bloom.update()
+        self.star_manager.update()
         self.border.update()
 
     def draw(self):
         for bloom in self.blooms:
             bloom.draw()
+        self.star_manager.draw()
         self.border.draw()

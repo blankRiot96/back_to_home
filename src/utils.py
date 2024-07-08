@@ -5,6 +5,13 @@ import typing as t
 import pygame
 
 
+def circle_surf(radius: int, color) -> pygame.Surface:
+    temp = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
+    pygame.draw.circle(temp, color, (radius, radius), radius)
+
+    return temp
+
+
 class Time:
     """
     Class to check if time has passed.
