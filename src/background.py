@@ -1,4 +1,5 @@
 import math
+import random
 import typing as t
 
 import pygame
@@ -32,6 +33,7 @@ class BorderSegment:
         self.pos.x = math.cos(math.radians(self.angle)) * Border.RADIUS
         self.pos.y = math.sin(math.radians(-self.angle)) * Border.RADIUS
 
+        self.pos += shared.srect.center
         self.angle %= 360
 
     def draw(self):
@@ -40,7 +42,7 @@ class BorderSegment:
 
 
 class Border:
-    RADIUS = 1250
+    RADIUS = 2150
     CIRCUM = 2 * math.pi * RADIUS
     N_SEGMENTS = int(CIRCUM / (BorderSegment.HEIGHT + BorderSegment.SPACING))
 
@@ -58,20 +60,14 @@ class Border:
         if not hasattr(shared, "player"):
             return
 
-        if shared.player.pos.distance_to((0, 0)) > Border.RADIUS:
-            print("DEATH")
+        if shared.player.pos.distance_to(shared.srect.center) > Border.RADIUS:
+            print(f"DEATH {random.randrange(10)}")
 
     def draw(self):
-        n = 0
         for segment in self.segements:
             if not shared.srect.collidepoint(*shared.camera.transform(segment.pos)):
                 continue
-            n += 1
             segment.draw()
-
-        text = f"{n} segments being drawn"
-        surf = self.font.render(text, True, "white")
-        shared.screen.blit(surf, (0, 0))
 
 
 class BloomLayer:
@@ -101,11 +97,19 @@ class BloomLayer:
         shared.screen.blit(self.image, (0, 0))
 
 
+class Star:
+    pass
+
+
+class StarManager:
+    pass
+
+
 class Background:
     def __init__(self) -> None:
         self.blooms = [
-            BloomLayer(1, ["red", "blue"], 0.05),
-            BloomLayer(2, ["green", "yellow"], 0.0),
+            # BloomLayer(1, ["red", "blue"], 0.05),
+            BloomLayer(2, ["#0a205a", "#040c24"], 0.0),
             BloomLayer(3, ["#e303fc", "#0362fc"], 0.0),
         ]
         self.border = Border()
