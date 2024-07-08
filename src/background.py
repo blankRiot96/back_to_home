@@ -61,11 +61,14 @@ class Border:
             return
 
         if shared.player.pos.distance_to(shared.srect.center) > Border.RADIUS:
-            print(f"DEATH {random.randrange(10)}")
+            # print(f"DEATH {random.randrange(10)}")
+            pass
 
     def draw(self):
         for segment in self.segements:
-            if not shared.srect.collidepoint(*shared.camera.transform(segment.pos)):
+            if not shared.srect.colliderect(
+                (shared.camera.transform(segment.pos), (segment.WIDTH, segment.HEIGHT))
+            ):
                 continue
             segment.draw()
 
@@ -98,12 +101,18 @@ class BloomLayer:
 
 
 class Star:
-    RADIUS = 10.0
+    RADIUS = 20.0
+    IMG: pygame.Surface
 
     def __init__(self, parallax_scale: int, pos: pygame.Vector2) -> None:
+        if not hasattr(Star, "IMG"):
+            Star.IMG = pygame.image.load("assets/images/star.png").convert_alpha()
+            Star.IMG = pygame.transform.smoothscale(
+                Star.IMG, (Star.RADIUS * 2, Star.RADIUS * 2)
+            )
         self.radius = Star.RADIUS * parallax_scale
         self.parallax_scale = parallax_scale
-        self.image = utils.circle_surf(self.radius, "white")
+        self.image = pygame.transform.scale_by(Star.IMG, parallax_scale)
         self.rect = self.image.get_rect()
         self.pos = pos.copy()
         self.rect.center = self.pos
