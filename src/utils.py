@@ -1,3 +1,4 @@
+import functools
 import itertools
 import time
 import typing as t
@@ -5,9 +6,30 @@ import typing as t
 import pygame
 
 
+@functools.lru_cache
+def load_image(
+    path: str, alpha: bool, bound: bool = False, scale: float = 1.0
+) -> pygame.Surface:
+    img = pygame.image.load(path)
+    if scale != 1.0:
+        img = pygame.transform.scale_by(img, scale)
+    if bound:
+        img = img.subsurface(img.get_bounding_rect()).copy()
+    if alpha:
+        return img.convert_alpha()
+    return img.convert()
+
+
 def circle_surf(radius: int, color) -> pygame.Surface:
     temp = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
     pygame.draw.circle(temp, color, (radius, radius), radius)
+
+    return temp
+
+
+def oval_surf(width, height, color) -> pygame.Surface:
+    temp = pygame.Surface((width, height), pygame.SRCALPHA)
+    pygame.draw.ellipse(temp, color, (0, 0, width, height))
 
     return temp
 

@@ -5,6 +5,7 @@ import typing as t
 import pygame
 
 if t.TYPE_CHECKING:
+    from src.arcangel import ArcAngelManager
     from src.camera import Camera
     from src.player import Player
 
@@ -26,3 +27,4 @@ clock: pygame.Clock
 
 # Entities
 player: Player
+arcangel_manager: ArcAngelManager
