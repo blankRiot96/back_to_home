@@ -101,15 +101,12 @@ class BloomLayer:
 
 
 class Star:
-    RADIUS = 20.0
+    RADIUS = 10.0
     IMG: pygame.Surface
 
     def __init__(self, parallax_scale: int, pos: pygame.Vector2) -> None:
         if not hasattr(Star, "IMG"):
             Star.IMG = pygame.image.load("assets/images/star.png").convert_alpha()
-            Star.IMG = pygame.transform.smoothscale(
-                Star.IMG, (Star.RADIUS * 2, Star.RADIUS * 2)
-            )
         self.radius = Star.RADIUS * parallax_scale
         self.parallax_scale = parallax_scale
         self.image = pygame.transform.scale_by(Star.IMG, parallax_scale)
@@ -122,7 +119,8 @@ class Star:
 
     def draw(self):
         shared.screen.blit(
-            self.image, shared.camera.transform(self.rect) * self.parallax_scale
+            self.image,
+            shared.camera.transform(self.rect) * self.parallax_scale,
         )
 
 
@@ -141,14 +139,25 @@ class StarManager:
             [Star(1.0, self._get_rnd_sp()) for _ in range(100)],
         ]
 
+    def star_in_screen(self, star: Star) -> bool:
+        temp = pygame.Rect(
+            shared.camera.transform(star.rect) * star.parallax_scale, star.rect.size
+        )
+        return shared.srect.colliderect(temp)
+
     def update(self):
         for layer in self.layers:
             for star in layer:
+                if not self.star_in_screen(star):
+                    continue
+
                 star.update()
 
     def draw(self):
         for layer in self.layers:
             for star in layer:
+                if not self.star_in_screen(star):
+                    continue
                 star.draw()
 
 

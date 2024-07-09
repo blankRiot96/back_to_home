@@ -7,6 +7,13 @@ from src import shared
 from src.utils import Time
 
 
+class HeadGun:
+    """The gun that shoots from the tip of the player's ship"""
+
+    def __init__(self) -> None:
+        pass
+
+
 class Player:
     MAX_VELOCITY = 75.0
     ROTATION_SPEED = 120.0
