@@ -30,7 +30,8 @@ class Bullet:
         self.pos.y += math.sin(-self.radians) * self.velocity * shared.dt
         self.rect.center = self.pos
 
-        self.alive = self.pos.distance_to(self.original_pos) < Bullet.DISTANCE
+        if self.pos.distance_to(self.original_pos) > Bullet.DISTANCE:
+            self.alive = False
 
     def draw(self):
         tmp = pygame.transform.rotate(Bullet.IMG, self.degrees)
@@ -119,8 +120,10 @@ class Player:
     def handle_arcangels(self):
         for bullet in self.headgun.bullets:
             for arcangel in shared.arcangel_manager.arcangels:
+                if not bullet.alive:
+                    continue
                 if arcangel.rect.colliderect(bullet.rect):
-                    arcangel.hp -= HeadGun.DAMAGE
+                    arcangel.take_damage(HeadGun.DAMAGE)
                     bullet.alive = False
 
     def update(self):

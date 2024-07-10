@@ -10,6 +10,7 @@ class Core:
         self.state_manager = StateManager()
 
     def win_init(self):
+        pygame.display.set_caption("Back To Home")
         pygame.init()
         shared.screen = pygame.display.set_mode((1100, 650))
         shared.srect = shared.screen.get_rect()
