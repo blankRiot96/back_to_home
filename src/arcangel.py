@@ -3,12 +3,12 @@ import math
 import pygame
 
 from src import shared, utils
-from src.sparks import MetalExplosion
+from src.sparks import MetalExplosion, MetalHit
 
 
 class ArcAngel:
     SPEED = 30.0
-    HP = 100
+    HP = 50
 
     def __init__(self) -> None:
         self.image = utils.load_image("assets/images/arcangel.png", True, True, 0.5)
@@ -19,14 +19,22 @@ class ArcAngel:
         self.alive = True
         self.hp = ArcAngel.HP
         self.taking_damage = False
+        self.original_overlay_color = (255, 255, 255)
+        self.overlay_color = self.original_overlay_color
 
     def take_damage(self, damage: int):
         self.taking_damage = True
         self.hp -= damage
         if self.hp <= 0:
             self.alive = False
+            return
 
     def update(self):
+        if self.overlay_color != self.original_overlay_color:
+            for _ in range(10):
+                self.overlay_color = utils.lerp_color(
+                    self.overlay_color, self.original_overlay_color
+                )
         self.pos.move_towards_ip(shared.player.pos, ArcAngel.SPEED * shared.dt)
         self.rect.topleft = self.pos
 
@@ -37,8 +45,9 @@ class ArcAngel:
     def draw(self):
         img = pygame.transform.rotate(self.image, self.angle)
         if self.taking_damage:
-            img.fill((255, 0, 0, 150), special_flags=pygame.BLEND_RGBA_MIN)
+            self.overlay_color = (255, 0, 0)
             self.taking_damage = False
+        img.fill(self.overlay_color, special_flags=pygame.BLEND_RGBA_MIN)
         rect = img.get_rect(center=self.orect.center + self.pos)
         shared.screen.blit(img, shared.camera.transform(rect))
 
@@ -47,6 +56,7 @@ class ArcAngelManager:
     def __init__(self) -> None:
         self.arcangels: list[ArcAngel] = [ArcAngel() for _ in range(5)]
         self.explosion = MetalExplosion()
+        self.hit_animation = MetalHit()
 
     def update(self):
         for arcangel in self.arcangels[:]:
@@ -66,9 +76,12 @@ class ArcAngelManager:
                     arcangel.pos.x += math.cos(math.radians(angle)) * val
                     arcangel.pos.y += math.sin(math.radians(-angle)) * val
                     arcangel.rect.topleft = arcangel.pos
+
+        self.hit_animation.update()
         self.explosion.update()
 
     def draw(self):
         for arcangel in self.arcangels:
             arcangel.draw()
+        self.hit_animation.draw()
         self.explosion.draw()

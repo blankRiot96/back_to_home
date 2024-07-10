@@ -124,6 +124,10 @@ class Player:
                     continue
                 if arcangel.rect.colliderect(bullet.rect):
                     arcangel.take_damage(HeadGun.DAMAGE)
+
+                    shared.arcangel_manager.hit_animation.spawn(
+                        bullet.rect.center, math.radians(self.angle)
+                    )
                     bullet.alive = False
 
     def update(self):

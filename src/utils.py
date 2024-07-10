@@ -20,6 +20,11 @@ def load_image(
     return img.convert()
 
 
+@functools.lru_cache
+def load_font(name: str | None, size: int) -> pygame.Font:
+    return pygame.Font(name, size)
+
+
 def circle_surf(radius: int, color) -> pygame.Surface:
     temp = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
     pygame.draw.circle(temp, color, (radius, radius), radius)

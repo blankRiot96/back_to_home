@@ -6,6 +6,7 @@ import pygame
 from src import shared
 
 RIGHT_ANGLE = math.pi / 2
+RAD_45 = RIGHT_ANGLE / 2
 COLOR = (200, 200, 170)
 
 
@@ -167,6 +168,43 @@ class ShockWave:
             self.radius,
             int(self.width),
         )
+
+
+class MetalHit:
+    def __init__(self) -> None:
+        self.particles: list[Particle] = []
+        self.shockwaves: list[ShockWave] = []
+
+    def spawn(self, pos: pygame.Vector2, radians: float):
+
+        for _ in range(10):
+            angle = random.uniform(radians, radians + RAD_45)
+            self.particles.append(
+                Particle(
+                    pos=pos,
+                    seconds=0.7,
+                    radius=random.uniform(15.0, 25.0),
+                    radians=angle,
+                    size=1.5,
+                    color=COLOR,
+                )
+            )
+        self.shockwaves.append(
+            ShockWave(
+                pos=pos,
+                duration=1.5,
+                max_radius=30,
+                starting_width=5,
+            )
+        )
+
+    def update(self):
+        entities_updater(self.particles)
+        entities_updater(self.shockwaves)
+
+    def draw(self):
+        entities_renderer(self.particles)
+        entities_renderer(self.shockwaves)
 
 
 class MetalExplosion:
