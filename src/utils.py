@@ -61,22 +61,24 @@ class Time:
 class ColorCycle:
     """Cycle through some colors"""
 
-    def __init__(self, colors: t.Sequence, cooldown: float) -> None:
+    def __init__(self, colors: t.Sequence, cooldown: float, loops: int = 1) -> None:
         self.colors = itertools.cycle(colors)
         self.color = self._get()
         self.target_color = self._get()
         self.cooldown = cooldown
-        self.timer = Time(cooldown)
+        self.timer = Time(cooldown) if cooldown else None
+        self.loops = loops
 
     def _get(self) -> pygame.Color:
         return pygame.Color(next(self.colors))
 
     def update(self):
-        if self.timer.tick():
-            self.color = lerp_color(self.color[:3], self.target_color[:3])
+        if not self.cooldown or self.timer.tick():
+            for _ in range(self.loops):
+                self.color = lerp_color(self.color[:3], self.target_color[:3])
 
-        if self.color == self.target_color:
-            self.target_color = self._get()
+                if self.color == self.target_color:
+                    self.target_color = self._get()
 
 
 def lerp_color(color_1: t.Sequence, color_2: t.Sequence) -> tuple[int, int, int]:

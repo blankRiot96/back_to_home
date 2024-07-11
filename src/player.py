@@ -4,6 +4,7 @@ import math
 import pygame
 
 from src import shared, utils
+from src.bars import HealthBar
 
 
 class Bullet:
@@ -102,6 +103,7 @@ class Player:
         )
 
         self.headgun = HeadGun()
+        self.health_bar = HealthBar()
 
     def perform_spawning_sequence(self):
         if shared.kp[pygame.K_TAB]:
@@ -176,9 +178,12 @@ class Player:
         self.headgun.update()
         self.handle_arcangels()
 
+        self.health_bar.update()
+
     def draw(self):
         if not self.spawning_sequence:
             self.image = pygame.transform.rotate(self.original_image, self.angle)
         self.rect = self.image.get_rect(center=self.original_rect.center + self.pos)
         self.headgun.draw()
         shared.screen.blit(self.image, shared.camera.transform(self.rect))
+        self.health_bar.draw()

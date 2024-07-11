@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import math
 
 import pygame
@@ -7,9 +9,86 @@ from src.info_text import DamageTextManager
 from src.sparks import MetalExplosion, MetalHit
 
 
+class Bullet:
+    COLOR = "yellow"
+    WIDTH = 20.0
+    HEIGHT = 4.0
+    DISTANCE = 700.0
+    IMG = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+    IMG.fill(COLOR)
+
+    BLOOM = utils.oval_surf(WIDTH * 1.5, HEIGHT * 2, (100, 100, 100))
+
+    def __init__(self, pos, angle) -> None:
+        self.original_pos = pygame.Vector2(pos)
+        self.pos = self.original_pos.copy()
+        self.rect = Bullet.IMG.get_rect(center=self.pos)
+        self.degrees = angle
+        self.radians = math.radians(angle)
+        self.velocity = 100.0
+        self.alive = True
+        self.dist = 0.0
+
+    def update(self):
+        self.pos.x += math.cos(self.radians) * self.velocity * shared.dt
+        self.pos.y += math.sin(-self.radians) * self.velocity * shared.dt
+        self.rect.center = self.pos
+
+        self.dist = self.pos.distance_to(self.original_pos)
+        if self.dist > Bullet.DISTANCE:
+            self.alive = False
+
+        if self.rect.colliderect(shared.player.rect):
+            shared.player.health_bar.amount -= HeadGun.DAMAGE
+            self.alive = False
+
+    def draw(self):
+        tmp = pygame.transform.rotate(Bullet.IMG, self.degrees)
+        tmp.set_alpha((1 - self.dist / Bullet.DISTANCE) * 255)
+        rect = tmp.get_rect(center=self.rect.center)
+        shared.screen.blit(tmp, shared.camera.transform(rect))
+
+        bloom = pygame.transform.rotate(Bullet.BLOOM, self.degrees)
+        brect = bloom.get_rect(center=self.pos)
+        shared.screen.blit(
+            bloom,
+            shared.camera.transform(brect),
+            special_flags=pygame.BLEND_RGB_ADD,
+        )
+
+
+class HeadGun:
+    """The gun that shoots from the tip of the arcangel's ship"""
+
+    DAMAGE = 50
+
+    def __init__(self, arcangel: ArcAngel) -> None:
+        self.bullets: list[Bullet] = []
+        self.bullet_cd = utils.Time(2.0)
+        self.arcangel = arcangel
+
+    def update(self):
+        if (
+            self.arcangel.pos.distance_to(shared.player.pos) < 500
+            and self.bullet_cd.tick()
+        ):
+            self.bullets.append(Bullet(self.arcangel.rect.center, self.arcangel.angle))
+
+        for bullet in self.bullets[:]:
+            bullet.update()
+
+            if not bullet.alive:
+                self.bullets.remove(bullet)
+
+    def draw(self):
+        for bullet in self.bullets:
+            bullet.draw()
+
+
 class ArcAngel:
     SPEED = 30.0
-    HP = 500
+    HP = 50
+    MAX_APPROACH_DISTANCE = 200
 
     def __init__(self) -> None:
         self.image = utils.load_image("assets/images/arcangel.png", True, True, 0.5)
@@ -23,6 +102,7 @@ class ArcAngel:
         self.original_overlay_color = (255, 255, 255)
         self.overlay_color = self.original_overlay_color
         self.dmg_text_manager = DamageTextManager()
+        self.headgun = HeadGun(self)
 
     def take_damage(self, damage: int):
         self.taking_damage = True
@@ -40,13 +120,15 @@ class ArcAngel:
                     self.overlay_color, self.original_overlay_color
                 )
 
-        # self.pos.move_towards_ip(shared.player.pos, ArcAngel.SPEED * shared.dt)
-        # self.rect.topleft = self.pos
+        if self.pos.distance_to(shared.player.pos) > ArcAngel.MAX_APPROACH_DISTANCE:
+            self.pos.move_towards_ip(shared.player.pos, ArcAngel.SPEED * shared.dt)
+        self.rect.topleft = self.pos
 
-        # tx, ty = shared.player.pos
-        # x, y = self.pos
-        # self.angle = -math.degrees(math.atan2(ty - y, tx - x))
+        tx, ty = shared.player.pos
+        x, y = self.pos
+        self.angle = -math.degrees(math.atan2(ty - y, tx - x))
         self.dmg_text_manager.update()
+        self.headgun.update()
 
     def draw(self):
         img = pygame.transform.rotate(self.image, self.angle)
@@ -55,6 +137,8 @@ class ArcAngel:
             self.taking_damage = False
         img.fill(self.overlay_color, special_flags=pygame.BLEND_RGBA_MIN)
         rect = img.get_rect(center=self.orect.center + self.pos)
+
+        self.headgun.draw()
         shared.screen.blit(img, shared.camera.transform(rect))
         self.dmg_text_manager.draw()
 

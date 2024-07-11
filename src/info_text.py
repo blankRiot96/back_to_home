@@ -6,12 +6,12 @@ from src import shared, utils
 
 
 class DamageText:
-    ALPHA_REDUCTION = 50.5
+    ALPHA_REDUCTION = 70.5
     SIZE_REDUCTION = 0.1
 
     def __init__(self, damage: int, pos: tuple[int, int]) -> None:
         self.damage = damage
-        self.font = utils.load_font(None, 30)
+        self.font = utils.load_font("assets/fonts/yamaka.otf", 20)
         self.original_surf = self.font.render(f"-{damage}", True, "red")
         self.surf = self.original_surf.copy()
         self.pos = pygame.Vector2(pos)
@@ -20,13 +20,15 @@ class DamageText:
         self.alpha = 255
         self.alive = True
 
-        self.dx = random.uniform(50.0, 100.0) * random.choice((-1, 1))
+        self.dx = random.uniform(10.0, 20.0) * random.choice((-1, 1))
+        self.dy = -random.uniform(40.0, 80.0)
 
     def update(self):
+        self.dy += 50.0 * shared.dt
         self.alpha -= DamageText.ALPHA_REDUCTION * shared.dt
         self.size_factor -= DamageText.SIZE_REDUCTION * shared.dt
         self.pos.x += self.dx * shared.dt
-        self.pos.y -= 10.7 * shared.dt
+        self.pos.y += self.dy * shared.dt
 
         if self.alpha <= 10:
             self.alive = False
