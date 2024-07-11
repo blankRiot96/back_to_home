@@ -3,12 +3,13 @@ import math
 import pygame
 
 from src import shared, utils
+from src.info_text import DamageTextManager
 from src.sparks import MetalExplosion, MetalHit
 
 
 class ArcAngel:
     SPEED = 30.0
-    HP = 50
+    HP = 500
 
     def __init__(self) -> None:
         self.image = utils.load_image("assets/images/arcangel.png", True, True, 0.5)
@@ -21,6 +22,7 @@ class ArcAngel:
         self.taking_damage = False
         self.original_overlay_color = (255, 255, 255)
         self.overlay_color = self.original_overlay_color
+        self.dmg_text_manager = DamageTextManager()
 
     def take_damage(self, damage: int):
         self.taking_damage = True
@@ -29,18 +31,22 @@ class ArcAngel:
             self.alive = False
             return
 
+        self.dmg_text_manager.spawn(damage, self.rect.midtop)
+
     def update(self):
         if self.overlay_color != self.original_overlay_color:
             for _ in range(10):
                 self.overlay_color = utils.lerp_color(
                     self.overlay_color, self.original_overlay_color
                 )
-        self.pos.move_towards_ip(shared.player.pos, ArcAngel.SPEED * shared.dt)
-        self.rect.topleft = self.pos
 
-        tx, ty = shared.player.pos
-        x, y = self.pos
-        self.angle = -math.degrees(math.atan2(ty - y, tx - x))
+        # self.pos.move_towards_ip(shared.player.pos, ArcAngel.SPEED * shared.dt)
+        # self.rect.topleft = self.pos
+
+        # tx, ty = shared.player.pos
+        # x, y = self.pos
+        # self.angle = -math.degrees(math.atan2(ty - y, tx - x))
+        self.dmg_text_manager.update()
 
     def draw(self):
         img = pygame.transform.rotate(self.image, self.angle)
@@ -50,6 +56,7 @@ class ArcAngel:
         img.fill(self.overlay_color, special_flags=pygame.BLEND_RGBA_MIN)
         rect = img.get_rect(center=self.orect.center + self.pos)
         shared.screen.blit(img, shared.camera.transform(rect))
+        self.dmg_text_manager.draw()
 
 
 class ArcAngelManager:
