@@ -54,5 +54,11 @@ class HealthBar(Bar):
         self.bg_color = pygame.Color("green").lerp("red", scale)
 
 
-class BoostBar:
-    pass
+class BoostBar(Bar):
+    def __init__(self) -> None:
+        super().__init__(
+            text="BOOST",
+            bg_color="blue",
+            max_amount=100,
+            pos=(20, 80),
+        )

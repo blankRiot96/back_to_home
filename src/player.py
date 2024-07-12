@@ -4,7 +4,7 @@ import math
 import pygame
 
 from src import shared, utils
-from src.bars import HealthBar
+from src.bars import BoostBar, HealthBar
 
 
 class Bullet:
@@ -101,9 +101,18 @@ class Player:
         self.spawning_images = itertools.cycle(
             (pygame.Surface(self.rect.size, pygame.SRCALPHA), self.original_image)
         )
+        self.boost = 1
+        self.boost_animation = utils.Animation(
+            [
+                utils.load_image(f"assets/images/boost{n}.png", True, True)
+                for n in range(1, 4)
+            ],
+            2.0,
+        )
 
         self.headgun = HeadGun()
         self.health_bar = HealthBar()
+        self.boost_bar = BoostBar()
 
     def perform_spawning_sequence(self):
         if shared.kp[pygame.K_TAB]:
@@ -138,6 +147,7 @@ class Player:
             return
         dx, dy = 0, 0
         moving = False
+        self.boost = 1
         angles = []
         if shared.keys[pygame.K_w]:
             moving = True
@@ -151,6 +161,9 @@ class Player:
         elif shared.keys[pygame.K_a]:
             moving = True
             angles.append(180)
+
+        if shared.keys[pygame.K_LSHIFT] and self.boost_bar.amount > 0:
+            self.boost = 2
 
         if angles:
             target_angle = sum(angles) / len(angles)
@@ -169,8 +182,10 @@ class Player:
             else:
                 self.velocity = 0
 
-        dx = self.velocity * math.cos(math.radians(self.angle)) * shared.dt
-        dy = self.velocity * math.sin(math.radians(-self.angle)) * shared.dt
+        dx = self.velocity * self.boost * math.cos(math.radians(self.angle)) * shared.dt
+        dy = (
+            self.velocity * self.boost * math.sin(math.radians(-self.angle)) * shared.dt
+        )
         self.pos.x += dx
         self.pos.y += dy
         self.last_target_angle = target_angle
@@ -179,6 +194,10 @@ class Player:
         self.handle_arcangels()
 
         self.health_bar.update()
+        self.boost_bar.update()
+        if self.boost > 1:
+            self.boost_bar.amount -= 10 * shared.dt
+            self.boost_animation.update(shared.dt)
 
     def draw(self):
         if not self.spawning_sequence:
@@ -187,3 +206,11 @@ class Player:
         self.headgun.draw()
         shared.screen.blit(self.image, shared.camera.transform(self.rect))
         self.health_bar.draw()
+        self.boost_bar.draw()
+
+        if self.boost > 1:
+            img = self.boost_animation.image.copy()
+            img = pygame.transform.rotate(img, self.angle)
+            rect = img.get_rect()
+            rect.center = self.rect.center
+            shared.screen.blit(img, shared.camera.transform(rect))

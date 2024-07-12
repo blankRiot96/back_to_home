@@ -39,6 +39,30 @@ def oval_surf(width, height, color) -> pygame.Surface:
     return temp
 
 
+class Animation:
+    def __init__(self, frames: list[pygame.Surface], speed: float):
+        self.frames = frames
+        self.speed = speed
+
+        self.f_len = len(frames)
+        self.index = 0
+        self.image = self.frames[self.index]
+
+    def update(self, dt):
+        self.index += self.speed * dt
+        if self.index > self.f_len - 1:
+            self.index = 0
+
+        self.image = self.frames[int(self.index)]
+
+    def draw(self, screen: pygame.Surface, pos: tuple[int, int]):
+        screen.blit(self.image, pos)
+
+    def play(self, screen, pos, dt):
+        self.update(dt)
+        self.draw(screen, pos)
+
+
 class Time:
     """
     Class to check if time has passed.

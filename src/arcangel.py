@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+import random
 
 import pygame
 
@@ -23,8 +24,9 @@ class Bullet:
         self.original_pos = pygame.Vector2(pos)
         self.pos = self.original_pos.copy()
         self.rect = Bullet.IMG.get_rect(center=self.pos)
-        self.degrees = angle
-        self.radians = math.radians(angle)
+        angle = int(angle)
+        self.degrees = random.randint(angle - 15, angle + 15)
+        self.radians = math.radians(self.degrees)
         self.velocity = 100.0
         self.alive = True
         self.dist = 0.0
@@ -114,6 +116,9 @@ class ArcAngel:
         self.dmg_text_manager.spawn(damage, self.rect.midtop)
 
     def update(self):
+        if self.rect.colliderect(shared.player.rect):
+            if shared.player.boost > 1:
+                self.take_damage(100)
         if self.overlay_color != self.original_overlay_color:
             for _ in range(10):
                 self.overlay_color = utils.lerp_color(
@@ -153,6 +158,7 @@ class ArcAngelManager:
         for arcangel in self.arcangels[:]:
             arcangel.update()
             if not arcangel.alive:
+                shared.player.boost_bar.amount += 20
                 self.explosion.spawn(arcangel.rect.center)
                 self.arcangels.remove(arcangel)
 
