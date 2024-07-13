@@ -54,6 +54,10 @@ class PlayButton:
         if self.hovering and shared.mouse_press[0]:
             self.clicked = True
 
+        self.released = False
+        if pygame.mouse.get_just_released()[0] and self.hovering:
+            self.released = True
+
         if self.hovering:
             self.color = utils.lerp_color(
                 pygame.Color(self.color)[:3], PlayButton.HOVER_COLOR[:3]
@@ -153,6 +157,9 @@ class MainMenu:
         self.title.update()
         self.play_button.update()
         self.moving_stars.update()
+
+        if self.play_button.released:
+            self.next_state = State.GAME
 
     def draw(self):
         shared.screen.blit(self.bg, (0, 0))
