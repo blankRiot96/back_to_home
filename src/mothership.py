@@ -1,6 +1,7 @@
 import pygame
 
 from src import shared
+from src.info_text import render_help_text
 from src.player import Player
 
 
@@ -60,4 +61,5 @@ class MotherShip:
         self.rect.midtop = self.pos
 
     def draw(self):
+        render_help_text("Mothership", "The ship to be fixed", self.rect, self.image)
         shared.screen.blit(self.image, shared.camera.transform(self.rect))

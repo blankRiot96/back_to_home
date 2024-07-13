@@ -59,6 +59,13 @@ class BoostBar(Bar):
         super().__init__(
             text="BOOST",
             bg_color="blue",
-            max_amount=100,
+            max_amount=200,
             pos=(20, 80),
         )
+
+    def update(self):
+        super().update()
+
+        self.bg_color = "blue"
+        if shared.player.boost > 1:
+            self.bg_color = "orange"

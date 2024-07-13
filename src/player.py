@@ -5,6 +5,7 @@ import pygame
 
 from src import shared, utils
 from src.bars import BoostBar, HealthBar
+from src.info_text import DamageTextManager, render_help_text
 
 
 class Bullet:
@@ -109,6 +110,7 @@ class Player:
             ],
             2.0,
         )
+        self.alive = True
 
         self.headgun = HeadGun()
         self.health_bar = HealthBar()
@@ -203,6 +205,12 @@ class Player:
         if not self.spawning_sequence:
             self.image = pygame.transform.rotate(self.original_image, self.angle)
         self.rect = self.image.get_rect(center=self.original_rect.center + self.pos)
+        render_help_text(
+            "Player's Ship",
+            "The ship you need to control to get the collectables",
+            self.rect,
+            self.image,
+        )
         self.headgun.draw()
         shared.screen.blit(self.image, shared.camera.transform(self.rect))
         self.health_bar.draw()

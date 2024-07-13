@@ -4,6 +4,43 @@ import pygame
 
 from src import shared, utils
 
+pygame.font.init()
+help_text_font = utils.load_font("assets/fonts/yamaka.otf", 15)
+
+
+def render_help_text(
+    name: str, desc: str, rect: pygame.Rect, surface: pygame.Surface, angle: float = 0.0
+) -> None:
+    """Render some help text for the entity"""
+
+    trans_rect = rect.move(*-shared.camera.offset)
+    if trans_rect.collidepoint(shared.mouse_pos):
+        surf_highlight = surface.copy()
+        mask = pygame.mask.from_surface(surf_highlight)
+        surf_highlight = mask.to_surface(setcolor="yellow")
+        surf_highlight.set_colorkey("black")
+        surf_highlight = pygame.transform.scale_by(surf_highlight, 1.1)
+        if angle:
+            surf_highlight = pygame.transform.rotate(surf_highlight, angle)
+
+        hrect = surf_highlight.get_rect(center=trans_rect.center)
+        shared.screen.blit(surf_highlight, hrect)
+
+        padding = 2
+        txt_surf = help_text_font.render(name, True, "purple")
+        desc_surf = help_text_font.render(desc, True, "white", wraplength=200)
+        bg_surf = pygame.Surface(
+            (
+                desc_surf.get_width() + padding,
+                desc_surf.get_height() + txt_surf.get_height() + padding,
+            )
+        )
+
+        bg_surf.blit(txt_surf, (0, 0))
+        bg_surf.blit(desc_surf, (0, txt_surf.get_height()))
+
+        shared.screen.blit(bg_surf, trans_rect.move(rect.width, 0))
+
 
 class DamageText:
     ALPHA_REDUCTION = 70.5

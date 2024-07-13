@@ -6,7 +6,7 @@ import random
 import pygame
 
 from src import shared, utils
-from src.info_text import DamageTextManager
+from src.info_text import DamageTextManager, render_help_text
 from src.sparks import MetalExplosion, MetalHit
 
 
@@ -66,15 +66,17 @@ class HeadGun:
 
     def __init__(self, arcangel: ArcAngel) -> None:
         self.bullets: list[Bullet] = []
-        self.bullet_cd = utils.Time(2.0)
+        self.bullet_cd = utils.Time(random.uniform(1.0, 3.0))
         self.arcangel = arcangel
+        self.idling = True
 
     def update(self):
-        if (
-            self.arcangel.pos.distance_to(shared.player.pos) < 500
-            and self.bullet_cd.tick()
-        ):
+        within_shooting_range = self.arcangel.pos.distance_to(shared.player.pos) < 500
+        if not within_shooting_range:
+            self.bullet_cd.reset()
+        if within_shooting_range and self.bullet_cd.tick():
             self.bullets.append(Bullet(self.arcangel.rect.center, self.arcangel.angle))
+            self.bullet_cd.time_to_pass = 2.0
 
         for bullet in self.bullets[:]:
             bullet.update()
@@ -136,6 +138,14 @@ class ArcAngel:
         self.headgun.update()
 
     def draw(self):
+
+        render_help_text(
+            "arcangel",
+            "Protects the collectable items",
+            self.rect,
+            self.image,
+            self.angle,
+        )
         img = pygame.transform.rotate(self.image, self.angle)
         if self.taking_damage:
             self.overlay_color = (255, 0, 0)
@@ -150,7 +160,7 @@ class ArcAngel:
 
 class ArcAngelManager:
     def __init__(self) -> None:
-        self.arcangels: list[ArcAngel] = [ArcAngel() for _ in range(5)]
+        self.arcangels: list[ArcAngel] = []  # ArcAngel() for _ in range(5)]
         self.explosion = MetalExplosion()
         self.hit_animation = MetalHit()
 
@@ -158,7 +168,8 @@ class ArcAngelManager:
         for arcangel in self.arcangels[:]:
             arcangel.update()
             if not arcangel.alive:
-                shared.player.boost_bar.amount += 20
+                if shared.player.boost == 1:
+                    shared.player.boost_bar.amount += 40
                 self.explosion.spawn(arcangel.rect.center)
                 self.arcangels.remove(arcangel)
 

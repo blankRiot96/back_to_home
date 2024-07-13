@@ -146,9 +146,9 @@ class StarManager:
 
     def __init__(self) -> None:
         self.layers = [
-            [Star(0.4, self._get_rnd_sp()) for _ in range(100)],
-            [Star(0.7, self._get_rnd_sp()) for _ in range(100)],
-            [Star(1.0, self._get_rnd_sp()) for _ in range(100)],
+            [Star(0.4, self._get_rnd_sp()) for _ in range(150)],
+            [Star(0.7, self._get_rnd_sp()) for _ in range(150)],
+            [Star(1.0, self._get_rnd_sp()) for _ in range(150)],
         ]
 
     def star_in_screen(self, star: Star) -> bool:
