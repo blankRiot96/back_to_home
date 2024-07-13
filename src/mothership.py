@@ -21,6 +21,7 @@ class MotherShip:
         self.speed = MotherShip.SPEED
         self.decel = 10.0
         self.spawned_player = False
+        self.take_off = False
 
     def spawn_player(self, skip=False):
         shared.player = Player()
@@ -33,6 +34,13 @@ class MotherShip:
         shared.player.blink_timer.reset()
 
     def update(self):
+        if self.take_off:
+            self.image = self.original_image.copy()
+            self.pos.x += 100.5 * shared.dt
+            shared.camera.attach_to(self.rect.center)
+            shared.mothership.spawned_player = False
+            self.rect.midtop = self.pos
+            return
         if self.speed > 10.0:
             self.speed -= self.decel * shared.dt
         else:

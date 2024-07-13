@@ -147,6 +147,9 @@ class CollectableManager:
         for collectable in self.collectables:
             collectable.update()
 
+        if all(collectable.collected for collectable in self.collectables):
+            shared.won = True
+
     def draw(self):
         for collectable in self.collectables:
             collectable.draw()

@@ -91,6 +91,7 @@ class Player:
         self.original_rect = self.original_image.get_rect(topleft=self.pos)
         self.rect = self.original_rect.copy()
         self.n_attached = 0
+        self.alpha = 255
 
         self.velocity = 0.0
         self.accel = 5.0
@@ -147,6 +148,20 @@ class Player:
                     bullet.alive = False
 
     def update(self):
+        if shared.won:
+            self.pos.move_towards_ip(
+                shared.mothership.rect.center, (Player.MAX_VELOCITY / 2) * shared.dt
+            )
+            if self.pos == shared.mothership.rect.center:
+                shared.mothership.take_off = True
+            self.rect.topleft = self.pos
+            if self.alpha > 100:
+                self.alpha -= 20 * shared.dt
+            else:
+                self.alpha = 100
+            self.original_image.set_alpha(self.alpha)
+            shared.camera.attach_to(self.rect.center)
+            return
         if self.spawning_sequence:
             self.perform_spawning_sequence()
             return

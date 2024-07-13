@@ -112,6 +112,8 @@ class ArcAngel:
         self.overlay_color = self.original_overlay_color
         self.dmg_text_manager = DamageTextManager()
         self.headgun = HeadGun(self)
+        self.winning_blinker = utils.Time(0.5)
+        self.to_display = True
         self.rng_and_idle_init()
 
     def rng_and_idle_init(self):
@@ -137,6 +139,8 @@ class ArcAngel:
         self.dmg_text_manager.spawn(damage, self.rect.midtop)
 
     def update(self):
+        if shared.won:
+            return
         if self.idling:
             self.pos.move_towards_ip(self.target_pos, ArcAngel.IDLE_SPEED * shared.dt)
             if self.pos == self.target_pos:
@@ -172,7 +176,6 @@ class ArcAngel:
         self.headgun.update()
 
     def draw(self):
-
         render_help_text(
             "arcangel",
             "Protects the collectable items",
@@ -180,6 +183,11 @@ class ArcAngel:
             self.image,
             self.angle,
         )
+        if shared.won and self.winning_blinker.tick():
+            self.to_display = not self.to_display
+
+        if not self.to_display:
+            return
         img = pygame.transform.rotate(self.image, self.angle)
         if self.taking_damage:
             self.overlay_color = (255, 0, 0)

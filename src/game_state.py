@@ -84,6 +84,10 @@ class GameState:
         )
 
         self.game_over_screen = GameOverScreen()
+        self.alpha = 0
+        self.win_overlay = pygame.Surface(shared.srect.size, pygame.SRCALPHA)
+        self.win_overlay.fill("black")
+        self.win_overlay.set_alpha(self.alpha)
 
     def blit_loading_screen(self):
         shared.screen.fill("black")
@@ -101,6 +105,17 @@ class GameState:
         pygame.display.flip()
 
     def update(self):
+        if shared.mothership.take_off and hasattr(shared, "player"):
+            del shared.player
+
+        if shared.mothership.take_off:
+            self.alpha += 20 * shared.dt
+            if self.alpha >= 255:
+                self.alpha = 255
+                self.next_state = State.VICTORY
+                return
+            self.win_overlay.set_alpha(self.alpha)
+
         if shared.game_over:
             self.game_over_screen.update()
             if shared.kp[pygame.K_TAB]:
@@ -114,12 +129,14 @@ class GameState:
                 self.next_state = State.MAIN_MENU
             return
 
-        if shared.kp[pygame.K_ESCAPE]:
+        if not shared.won and shared.kp[pygame.K_ESCAPE]:
             shared.pausing = not shared.pausing
 
         if shared.pausing:
             return
 
+        if shared.kp[pygame.K_g]:
+            shared.won = True
         self.background.update()
         shared.mothership.update()
         self.collectable_manager.update()
@@ -140,3 +157,4 @@ class GameState:
 
         if shared.game_over:
             self.game_over_screen.draw()
+        shared.screen.blit(self.win_overlay, (0, 0))
