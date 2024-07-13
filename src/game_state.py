@@ -135,8 +135,6 @@ class GameState:
         if shared.pausing:
             return
 
-        if shared.kp[pygame.K_g]:
-            shared.won = True
         self.background.update()
         shared.mothership.update()
         self.collectable_manager.update()

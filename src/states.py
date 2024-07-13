@@ -2,6 +2,7 @@ import typing as t
 
 from src.enums import State
 from src.game_state import GameState
+from src.intro_state import IntroState
 from src.main_menu import MainMenu
 from src.victory_state import VictoryState
 
@@ -17,8 +18,9 @@ class StateLike(t.Protocol):
 class StateManager:
     def __init__(self) -> None:
         self.state_dict: dict[State, StateLike] = {
-            State.GAME: GameState,
             State.MAIN_MENU: MainMenu,
+            State.INTRO: IntroState,
+            State.GAME: GameState,
             State.VICTORY: VictoryState,
         }
 
