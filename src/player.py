@@ -91,6 +91,7 @@ class Player:
         self.pos = pygame.Vector2()
         self.original_rect = self.original_image.get_rect(topleft=self.pos)
         self.rect = self.original_rect.copy()
+        self.n_attached = 0
 
         self.velocity = 0.0
         self.accel = 5.0
@@ -184,9 +185,20 @@ class Player:
             else:
                 self.velocity = 0
 
-        dx = self.velocity * self.boost * math.cos(math.radians(self.angle)) * shared.dt
+        gradient = 1.5 / (self.n_attached + 1)
+        dx = (
+            gradient
+            * self.velocity
+            * self.boost
+            * math.cos(math.radians(self.angle))
+            * shared.dt
+        )
         dy = (
-            self.velocity * self.boost * math.sin(math.radians(-self.angle)) * shared.dt
+            gradient
+            * self.velocity
+            * self.boost
+            * math.sin(math.radians(-self.angle))
+            * shared.dt
         )
         self.pos.x += dx
         self.pos.y += dy

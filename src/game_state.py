@@ -12,7 +12,7 @@ class GameState:
     def __init__(self) -> None:
         self.next_state = None
         shared.camera = Camera()
-        self.mothership = MotherShip()
+        shared.mothership = MotherShip()
         self.background = Background()
         shared.arcangel_manager = ArcAngelManager()
         self.collectable_manager = CollectableManager()
@@ -42,17 +42,17 @@ class GameState:
             return
 
         self.background.update()
-        self.mothership.update()
+        shared.mothership.update()
         self.collectable_manager.update()
-        if self.mothership.spawned_player:
+        if shared.mothership.spawned_player:
             shared.player.update()
             shared.arcangel_manager.update()
 
     def draw(self):
         self.background.draw()
-        self.mothership.draw()
+        shared.mothership.draw()
         self.collectable_manager.draw()
-        if self.mothership.spawned_player:
+        if shared.mothership.spawned_player:
             shared.player.draw()
             shared.arcangel_manager.draw()
 

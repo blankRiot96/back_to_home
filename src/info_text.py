@@ -1,4 +1,5 @@
 import random
+import typing as t
 
 import pygame
 
@@ -9,11 +10,19 @@ help_text_font = utils.load_font("assets/fonts/yamaka.otf", 15)
 
 
 def render_help_text(
-    name: str, desc: str, rect: pygame.Rect, surface: pygame.Surface, angle: float = 0.0
+    name: str,
+    desc: str,
+    rect: pygame.Rect,
+    surface: pygame.Surface,
+    angle: float = 0.0,
+    transform: bool = True,
+    render_offest: tuple[int, int] | None = None,
 ) -> None:
     """Render some help text for the entity"""
 
-    trans_rect = rect.move(*-shared.camera.offset)
+    trans_rect = rect.copy()
+    if transform:
+        trans_rect = rect.move(*-shared.camera.offset)
     if trans_rect.collidepoint(shared.mouse_pos):
         surf_highlight = surface.copy()
         mask = pygame.mask.from_surface(surf_highlight)
@@ -39,7 +48,11 @@ def render_help_text(
         bg_surf.blit(txt_surf, (0, 0))
         bg_surf.blit(desc_surf, (0, txt_surf.get_height()))
 
-        shared.screen.blit(bg_surf, trans_rect.move(rect.width, 0))
+        if render_offest is not None:
+            offset = render_offest
+        else:
+            offset = trans_rect.move(rect.width, 0)
+        shared.screen.blit(bg_surf, offset)
 
 
 class DamageText:
