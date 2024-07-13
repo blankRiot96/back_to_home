@@ -22,7 +22,7 @@ class Collectable:
         self.catch_rect = self.catch_surf.get_rect(midbottom=self.rect.midtop)
 
         self.attach_surf = self.font.render(
-            "Press [G] to attach to mothership", True, "red", "black"
+            "Press [R] to attach to mothership", True, "green", "black"
         )
         self.attach_rect = self.catch_surf.get_rect(midbottom=self.rect.midtop)
 
@@ -53,7 +53,8 @@ class Collectable:
         if not self.collected and self.attached and self.dist > 200:
             shared.player.n_attached += 1
             self.pos.move_towards_ip(
-                shared.player.rect.center, shared.player.velocity * shared.dt
+                shared.player.rect.center,
+                shared.player.velocity * shared.player.boost * shared.dt,
             )
 
         self.rect.center = self.pos
@@ -63,7 +64,7 @@ class Collectable:
         if (
             self.attached
             and self.pos.distance_to(shared.mothership.rect.center) < 200
-            and shared.kp[pygame.K_g]
+            and shared.kp[pygame.K_r]
         ):
             self.collected = True
 
@@ -117,25 +118,25 @@ class CollectableManager:
                 "reflux-manager.png",
                 "Reflux Manager",
                 "Monitors and regulates the flow of waste gases and liquids, ensuring efficient processing and a safe environment for the crew",
-                (0, 0),
+                (1200, -1200),
             ),
             Collectable(
                 "spring-balancer.png",
                 "Spring Balancer",
                 "Maintains tension in mechanical systems, ensuring stable and smooth operation of moving parts",
-                (0, 150),
+                (-500, -1200),
             ),
             Collectable(
                 "left-wing.png",
                 "Left Wing",
                 "Provides stability and directional control during flight maneuvers",
-                (0, 300),
+                (-500, 1200),
             ),
             Collectable(
                 "power-surge.png",
                 "Power Surge",
                 "Provides a temporary boost of energy to critical systems during high-demand situations",
-                (0, 450),
+                (1500, 1400),
             ),
         ]
 

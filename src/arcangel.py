@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import itertools
 import math
 import random
 
@@ -14,7 +15,7 @@ class Bullet:
     COLOR = "yellow"
     WIDTH = 20.0
     HEIGHT = 4.0
-    DISTANCE = 700.0
+    DISTANCE = 900.0
     IMG = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
     IMG.fill(COLOR)
 
@@ -27,7 +28,7 @@ class Bullet:
         angle = int(angle)
         self.degrees = random.randint(angle - 15, angle + 15)
         self.radians = math.radians(self.degrees)
-        self.velocity = 100.0
+        self.velocity = 200.0
         self.alive = True
         self.dist = 0.0
 
@@ -66,7 +67,7 @@ class HeadGun:
 
     def __init__(self, arcangel: ArcAngel) -> None:
         self.bullets: list[Bullet] = []
-        self.bullet_cd = utils.Time(random.uniform(1.0, 3.0))
+        self.bullet_cd = utils.Time(random.uniform(0.5, 1.5))
         self.arcangel = arcangel
         self.idling = True
 
@@ -76,7 +77,7 @@ class HeadGun:
             self.bullet_cd.reset()
         if within_shooting_range and self.bullet_cd.tick():
             self.bullets.append(Bullet(self.arcangel.rect.center, self.arcangel.angle))
-            self.bullet_cd.time_to_pass = 2.0
+            self.bullet_cd.time_to_pass = 1.0
 
         for bullet in self.bullets[:]:
             bullet.update()
@@ -90,15 +91,16 @@ class HeadGun:
 
 
 class ArcAngel:
-    SPEED = 30.0
+    SPEED = 35.0
     HP = 50
     MAX_APPROACH_DISTANCE = 200
+    IDLE_SPEED = 10.0
 
-    def __init__(self) -> None:
+    def __init__(self, pos) -> None:
         self.image = utils.load_image("assets/images/arcangel.png", True, True, 0.5)
         self.orect = self.image.get_rect()
         self.rect = self.orect.copy()
-        self.pos = pygame.Vector2()
+        self.pos = pygame.Vector2(pos)
         self.angle = 0.0
         self.alive = True
         self.hp = ArcAngel.HP
@@ -107,6 +109,20 @@ class ArcAngel:
         self.overlay_color = self.original_overlay_color
         self.dmg_text_manager = DamageTextManager()
         self.headgun = HeadGun(self)
+        self.rng_and_idle_init()
+
+    def rng_and_idle_init(self):
+        self.idling = True
+        self.pos = pygame.Vector2(
+            random.uniform(self.pos.x - 400, self.pos.x + 400),
+            random.uniform(self.pos.y - 400, self.pos.y + 400),
+        )
+        self.target_pos = pygame.Vector2(
+            random.uniform(self.pos.x - 400, self.pos.x + 400),
+            random.uniform(self.pos.y - 400, self.pos.y + 400),
+        )
+        self.walking_points = itertools.cycle((self.pos.copy(), self.target_pos.copy()))
+        self.rect.topleft = self.pos
 
     def take_damage(self, damage: int):
         self.taking_damage = True
@@ -118,6 +134,20 @@ class ArcAngel:
         self.dmg_text_manager.spawn(damage, self.rect.midtop)
 
     def update(self):
+        if self.idling:
+            self.pos.move_towards_ip(self.target_pos, ArcAngel.IDLE_SPEED * shared.dt)
+            if self.pos == self.target_pos:
+                self.target_pos = next(self.walking_points)
+            self.angle = -math.degrees(
+                math.atan2(
+                    self.target_pos.y - self.pos.y, self.target_pos.x - self.pos.x
+                )
+            )
+
+            if self.pos.distance_to(shared.player.rect.center) < 400:
+                self.idling = False
+            return
+
         if self.rect.colliderect(shared.player.rect):
             if shared.player.boost > 1:
                 self.take_damage(100)
@@ -160,7 +190,10 @@ class ArcAngel:
 
 class ArcAngelManager:
     def __init__(self) -> None:
-        self.arcangels: list[ArcAngel] = []  # ArcAngel() for _ in range(5)]
+        positions = [(1200, -1200), (-500, -1200), (-500, 1200), (1500, 1400)]
+        self.arcangels: list[ArcAngel] = [
+            ArcAngel(pos) for pos in positions for _ in range(5)
+        ]
         self.explosion = MetalExplosion()
         self.hit_animation = MetalHit()
 

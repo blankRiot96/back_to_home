@@ -42,12 +42,15 @@ class HealthBar(Bar):
         super().__init__(
             text="HEALTH",
             bg_color="green",
-            max_amount=500,
+            max_amount=1000,
             pos=(20, 20),
         )
-        self.amount = 500
+        self.amount = self.max_amount
 
     def update(self):
+        if self.amount <= 10:
+            pass
+
         super().update()
 
         scale = 1 - self.amount / self.max_amount
@@ -64,6 +67,9 @@ class BoostBar(Bar):
         )
 
     def update(self):
+        if self.amount >= self.max_amount:
+            self.amount = self.max_amount
+
         super().update()
 
         self.bg_color = "blue"
