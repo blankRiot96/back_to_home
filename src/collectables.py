@@ -5,9 +5,7 @@ from src.info_text import render_help_text
 
 
 class Collectable:
-    N = 0
-
-    def __init__(self, image_name, name: str, desc: str, pos) -> None:
+    def __init__(self, n: int, image_name, name: str, desc: str, pos) -> None:
         self.image = utils.load_image(f"assets/images/{image_name}", True, True)
         self.rect = self.image.get_rect(center=pos)
         self.pos = pygame.Vector2(pos)
@@ -28,8 +26,7 @@ class Collectable:
 
         self.attached = False
         self.collected = False
-        self.n = Collectable.N
-        Collectable.N += 1
+        self.n = n
 
         width = 40
         x = (self.n * (width + 10)) + 20
@@ -115,24 +112,28 @@ class CollectableManager:
     def __init__(self) -> None:
         self.collectables = [
             Collectable(
+                0,
                 "reflux-manager.png",
                 "Reflux Manager",
                 "Monitors and regulates the flow of waste gases and liquids, ensuring efficient processing and a safe environment for the crew",
                 (1200, -1200),
             ),
             Collectable(
+                1,
                 "spring-balancer.png",
                 "Spring Balancer",
                 "Maintains tension in mechanical systems, ensuring stable and smooth operation of moving parts",
                 (-500, -1200),
             ),
             Collectable(
+                2,
                 "left-wing.png",
                 "Left Wing",
                 "Provides stability and directional control during flight maneuvers",
                 (-500, 1200),
             ),
             Collectable(
+                3,
                 "power-surge.png",
                 "Power Surge",
                 "Provides a temporary boost of energy to critical systems during high-demand situations",

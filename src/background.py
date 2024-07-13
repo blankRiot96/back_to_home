@@ -61,8 +61,8 @@ class Border:
             return
 
         if shared.player.pos.distance_to(shared.srect.center) > Border.RADIUS:
-            # print(f"DEATH {random.randrange(10)}")
-            pass
+            shared.player.metal_explosion.spawn(shared.player.rect.center)
+            shared.game_over = True
 
     def draw(self):
         for segment in self.segements:
@@ -75,8 +75,8 @@ class Border:
 
 class BloomLayer:
     def __init__(self, n: int, colors: t.Sequence, cooldown: float) -> None:
-        self.original_image = pygame.image.load(
-            f"assets/images/level_1/bloom_{n}.png"
+        self.original_image = utils.load_image(
+            f"assets/images/level_1/bloom_{n}.png", True
         ).convert_alpha()
         self.orect = self.original_image.get_rect()
         self.image = self.original_image.copy()

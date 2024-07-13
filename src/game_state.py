@@ -5,7 +5,54 @@ from src.arcangel import ArcAngelManager
 from src.background import Background
 from src.camera import Camera
 from src.collectables import CollectableManager
+from src.enums import State
 from src.mothership import MotherShip
+
+
+class GameOverScreen:
+    def __init__(self) -> None:
+        self.surf = pygame.Surface(shared.srect.size, pygame.SRCALPHA)
+        self.surf.fill("red")
+        self.surf.set_alpha(0)
+        self.alpha = 0
+        self.font = utils.load_font("assets/fonts/yamaka.otf", 60)
+        self.init_text_stuffs()
+
+    def init_text_stuffs(self):
+        self.over_text = self.font.render("Game Over", True, "white")
+        self.over_rect = self.over_text.get_rect(
+            center=shared.srect.midtop + pygame.Vector2(0, 100)
+        )
+
+        sub_font = utils.load_font("assets/fonts/yamaka.otf", 32)
+        self.help_text = sub_font.render("Press TAB to Restart", True, "white")
+        self.help_rect = self.help_text.get_rect(
+            center=shared.srect.center + pygame.Vector2(0, 50)
+        )
+
+        menu_text = sub_font.render("Press ENTER to go to the Main Menu", True, "white")
+        menu_rect = menu_text.get_rect(
+            center=shared.srect.center + pygame.Vector2(0, 100)
+        )
+
+        self.renders: list[tuple[pygame.Surface, pygame.Rect]] = [
+            (self.over_text, self.over_rect),
+            (self.help_text, self.help_rect),
+            (menu_text, menu_rect),
+        ]
+
+    def update(self):
+        if self.alpha < 150:
+            self.alpha += 20 * shared.dt
+        else:
+            self.alpha = 150
+
+        self.surf.set_alpha(self.alpha)
+
+    def draw(self):
+        shared.screen.blit(self.surf, (0, 0))
+        for text, rect in self.renders:
+            shared.screen.blit(text, rect)
 
 
 class GameState:
@@ -16,7 +63,9 @@ class GameState:
         self.background = Background()
         shared.arcangel_manager = ArcAngelManager()
         self.collectable_manager = CollectableManager()
-        self.pausing = False
+        shared.game_over = False
+        shared.won = False
+        shared.pausing = False
 
         font = utils.load_font("assets/fonts/yamaka.otf", 60)
         self.paused_image = pygame.Surface(shared.srect.size, pygame.SRCALPHA)
@@ -34,11 +83,41 @@ class GameState:
             help_surf.get_rect(center=shared.srect.center + pygame.Vector2(0, 100)),
         )
 
-    def update(self):
-        if shared.kp[pygame.K_ESCAPE]:
-            self.pausing = not self.pausing
+        self.game_over_screen = GameOverScreen()
 
-        if self.pausing:
+    def blit_loading_screen(self):
+        shared.screen.fill("black")
+        font = utils.load_font("assets/fonts/yamaka.otf", 60)
+        text = font.render("Loading...", True, "green")
+        text_rect = text.get_rect(center=shared.srect.center + pygame.Vector2(0, -100))
+
+        img = utils.load_image(
+            "assets/images/pygame_ce_powered.png", True, True, scale=0.2
+        )
+        img_rect = img.get_rect(center=shared.srect.center + pygame.Vector2(0, 50))
+
+        shared.screen.blit(text, text_rect)
+        shared.screen.blit(img, img_rect)
+        pygame.display.flip()
+
+    def update(self):
+        if shared.game_over:
+            self.game_over_screen.update()
+            if shared.kp[pygame.K_TAB]:
+                shared.game_over = False
+                self.next_state = State.GAME
+                del shared.player
+                self.blit_loading_screen()
+            if shared.kp[pygame.K_RETURN]:
+                shared.game_over = False
+                del shared.player
+                self.next_state = State.MAIN_MENU
+            return
+
+        if shared.kp[pygame.K_ESCAPE]:
+            shared.pausing = not shared.pausing
+
+        if shared.pausing:
             return
 
         self.background.update()
@@ -56,5 +135,8 @@ class GameState:
             shared.player.draw()
             shared.arcangel_manager.draw()
 
-        if self.pausing:
+        if shared.pausing:
             shared.screen.blit(self.paused_image, (0, 0))
+
+        if shared.game_over:
+            self.game_over_screen.draw()

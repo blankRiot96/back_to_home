@@ -8,11 +8,18 @@ import pygame
 
 @functools.lru_cache
 def load_image(
-    path: str, alpha: bool, bound: bool = False, scale: float = 1.0
+    path: str,
+    alpha: bool,
+    bound: bool = False,
+    scale: float = 1.0,
+    smooth: bool = False,
 ) -> pygame.Surface:
     img = pygame.image.load(path)
     if scale != 1.0:
-        img = pygame.transform.scale_by(img, scale)
+        if smooth:
+            img = pygame.transform.smoothscale_by(img, scale)
+        else:
+            img = pygame.transform.scale_by(img, scale)
     if bound:
         img = img.subsurface(img.get_bounding_rect()).copy()
     if alpha:

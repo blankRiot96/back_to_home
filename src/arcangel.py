@@ -42,6 +42,7 @@ class Bullet:
             self.alive = False
 
         if self.rect.colliderect(shared.player.rect):
+            shared.player.metal_explosion.spawn(shared.player.pos)
             shared.player.health_bar.amount -= HeadGun.DAMAGE
             self.alive = False
 
@@ -86,6 +87,8 @@ class HeadGun:
                 self.bullets.remove(bullet)
 
     def draw(self):
+        if shared.pausing:
+            self.bullet_cd.reset()
         for bullet in self.bullets:
             bullet.draw()
 
@@ -146,6 +149,7 @@ class ArcAngel:
 
             if self.pos.distance_to(shared.player.rect.center) < 400:
                 self.idling = False
+            self.rect.topleft = self.pos
             return
 
         if self.rect.colliderect(shared.player.rect):

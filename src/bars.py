@@ -42,14 +42,15 @@ class HealthBar(Bar):
         super().__init__(
             text="HEALTH",
             bg_color="green",
-            max_amount=1000,
+            max_amount=1020,
             pos=(20, 20),
         )
         self.amount = self.max_amount
 
     def update(self):
-        if self.amount <= 10:
-            pass
+        if self.amount <= 20:
+            shared.game_over = True
+            return
 
         super().update()
 

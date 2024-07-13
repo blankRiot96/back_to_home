@@ -6,6 +6,7 @@ import pygame
 from src import shared, utils
 from src.bars import BoostBar, HealthBar
 from src.info_text import DamageTextManager, render_help_text
+from src.sparks import MetalExplosion
 
 
 class Bullet:
@@ -78,9 +79,7 @@ class Player:
     ROTATION_SPEED = 120.0
 
     def __init__(self) -> None:
-        self.original_image = pygame.image.load(
-            "assets/images/player.png"
-        ).convert_alpha()
+        self.original_image = utils.load_image("assets/images/player.png", True)
         self.original_image = pygame.transform.scale_by(
             self.original_image.subsurface(
                 self.original_image.get_bounding_rect()
@@ -112,6 +111,7 @@ class Player:
             2.0,
         )
         self.alive = True
+        self.metal_explosion = MetalExplosion()
 
         self.headgun = HeadGun()
         self.health_bar = HealthBar()
@@ -134,6 +134,8 @@ class Player:
     def handle_arcangels(self):
         for bullet in self.headgun.bullets:
             for arcangel in shared.arcangel_manager.arcangels:
+                if arcangel.idling:
+                    continue
                 if not bullet.alive:
                     continue
                 if arcangel.rect.colliderect(bullet.rect):
@@ -214,6 +216,11 @@ class Player:
             self.boost_animation.update(shared.dt)
 
     def draw(self):
+        if shared.game_over:
+            self.metal_explosion.update()
+            self.metal_explosion.draw()
+            return
+
         if not self.spawning_sequence:
             self.image = pygame.transform.rotate(self.original_image, self.angle)
         self.rect = self.image.get_rect(center=self.original_rect.center + self.pos)

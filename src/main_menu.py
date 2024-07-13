@@ -150,8 +150,24 @@ class MainMenu:
         self.play_button = PlayButton()
         self.moving_stars = MovingStars()
 
+    def blit_loading_screen(self):
+        shared.screen.fill("black")
+        font = utils.load_font("assets/fonts/yamaka.otf", 60)
+        text = font.render("Loading...", True, "green")
+        text_rect = text.get_rect(center=shared.srect.center + pygame.Vector2(0, -100))
+
+        img = utils.load_image(
+            "assets/images/pygame_ce_powered.png", True, True, scale=0.2
+        )
+        img_rect = img.get_rect(center=shared.srect.center + pygame.Vector2(0, 50))
+
+        shared.screen.blit(text, text_rect)
+        shared.screen.blit(img, img_rect)
+        pygame.display.flip()
+
     def update(self):
         if shared.kp[pygame.K_TAB]:
+            self.blit_loading_screen()
             self.next_state = State.GAME
 
         self.title.update()
@@ -159,6 +175,7 @@ class MainMenu:
         self.moving_stars.update()
 
         if self.play_button.released:
+            self.blit_loading_screen()
             self.next_state = State.GAME
 
     def draw(self):

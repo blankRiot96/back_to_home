@@ -1,6 +1,6 @@
 import pygame
 
-from src import shared
+from src import shared, utils
 from src.info_text import render_help_text
 from src.player import Player
 
@@ -9,22 +9,11 @@ class MotherShip:
     SPEED = 100.0
 
     def __init__(self) -> None:
-        self.original_image = pygame.image.load(
-            "assets/images/mothership.png"
-        ).convert_alpha()
-        self.original_image = pygame.transform.scale_by(
-            self.original_image.subsurface(
-                self.original_image.get_bounding_rect()
-            ).copy(),
-            0.5,
+        self.original_image = utils.load_image(
+            "assets/images/mothership.png", True, True, 0.5
         )
-
-        self.out_image = pygame.image.load(
-            "assets/images/mothership-split.png"
-        ).convert_alpha()
-        self.out_image = pygame.transform.scale_by(
-            self.out_image.subsurface(self.out_image.get_bounding_rect()).copy(),
-            0.5,
+        self.out_image = utils.load_image(
+            "assets/images/mothership-split.png", True, True, 0.5
         )
         self.image = self.original_image.copy()
         self.pos = pygame.Vector2()

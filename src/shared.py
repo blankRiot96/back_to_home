@@ -29,3 +29,8 @@ clock: pygame.Clock
 player: Player
 mothership: MotherShip
 arcangel_manager: ArcAngelManager
+
+# Flags
+game_over: bool
+won: bool
+pausing: bool
